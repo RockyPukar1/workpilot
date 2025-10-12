@@ -1,0 +1,2 @@
+- [ ] Sharing/Private - you will have access to your own as well as shared by the company. You can also share to your company
+- [ ] If any changes have been made in the company shared resources it should notify it to all what changes have been made and highlight it as like git does
