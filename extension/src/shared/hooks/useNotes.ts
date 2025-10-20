@@ -32,11 +32,19 @@ export const useNotes = () => {
     },
   });
 
+  const clearMutation = useMutation({
+    mutationFn: () => notesStorage.clear(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+  });
+
   return {
     notes,
     isLoading,
     addNote: addMutation.mutate,
     updateNote: updateMutation.mutate,
     deleteNote: deleteMutation.mutate,
+    clearAll: clearMutation.mutate,
   };
 };

@@ -87,8 +87,82 @@ function showTemplateMenu() {
   console.log("Show template menu");
 }
 
+// Clipboard monitoring - only on copy events
+function startClipboardMonitoring() {
+  console.log("Starting clipboard monitoring...");
+
+  // Check if clipboard API is available
+  if (!navigator.clipboard) {
+    console.log("Clipboard API not available, clipboard monitoring disabled");
+    return;
+  }
+
+  // Listen for copy events only
+  document.addEventListener("copy", handleCopy);
+  console.log("Clipboard monitoring started - listening for copy events only");
+}
+
+let lastClipboardContent = "";
+let isProcessingClipboard = false;
+
+async function handleCopy() {
+  console.log("Copy event detected!");
+
+  if (isProcessingClipboard) {
+    console.log("Already processing clipboard, skipping...");
+    return;
+  }
+
+  isProcessingClipboard = true;
+
+  // Delay to ensure clipboard is updated
+  setTimeout(async () => {
+    try {
+      await processClipboardContent();
+    } catch (error) {
+      console.log("Error processing clipboard:", error);
+    } finally {
+      isProcessingClipboard = false;
+    }
+  }, 200);
+}
+
+async function processClipboardContent() {
+  try {
+    const clipboardText = await navigator.clipboard.readText();
+    console.log("Clipboard text:", clipboardText);
+
+    if (
+      clipboardText &&
+      clipboardText.trim() &&
+      clipboardText !== lastClipboardContent
+    ) {
+      lastClipboardContent = clipboardText;
+      console.log("New clipboard content detected:", clipboardText);
+
+      // Send to background script to save
+      chrome.runtime.sendMessage(
+        {
+          type: "CLIPBOARD_COPIED",
+          payload: { content: clipboardText },
+        },
+        () => {
+          if (chrome.runtime.lastError) {
+            console.log("Error sending message:", chrome.runtime.lastError);
+          } else {
+            console.log("CLIPBOARD_COPIED message sent successfully");
+          }
+        }
+      );
+    }
+  } catch (error) {
+    console.log("Could not read clipboard:", error);
+  }
+}
+
 // Initialize
 startListening();
+startClipboardMonitoring();
 
 // Message listener
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {

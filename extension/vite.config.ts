@@ -11,4 +11,13 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      input: {
+        popup: "src/popup/index.html",
+        content: "src/content/index.ts",
+        background: "src/background/index.ts",
+      },
+    },
+  },
 });

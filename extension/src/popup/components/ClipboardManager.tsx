@@ -14,13 +14,13 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Card } from "@/shared/components/ui/card";
-import { useAppStore } from "@/shared/store";
+import { useNavigate } from "react-router-dom";
 import { useClipboard } from "@/shared/hooks/useClipboard";
 import { cn } from "@/shared/utils/cn";
 import { format } from "date-fns";
 
 export function ClipboardManager() {
-  const setCurrentView = useAppStore((state) => state.setCurrentView);
+  const navigate = useNavigate();
   const { items, updateItem, deleteItem, clearAll } = useClipboard();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -52,11 +52,7 @@ export function ClipboardManager() {
       {/* Header */}
       <div className="border-b px-4 py-3">
         <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setCurrentView("dashboard")}
-          >
+          <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>

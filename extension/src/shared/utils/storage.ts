@@ -9,6 +9,7 @@ export const clipboardStorage = {
 
   async add(item: Omit<ClipboardItem, "id">): Promise<number> {
     const id = await db.clipboard.add(item as ClipboardItem);
+    console.log("added item", id);
     return id as number;
   },
 
@@ -51,6 +52,10 @@ export const notesStorage = {
   async get(id: number): Promise<Note | undefined> {
     return await db.notes.get(id);
   },
+
+  async clear(): Promise<void> {
+    await db.notes.clear();
+  },
 };
 
 // Templates Operations
@@ -86,6 +91,10 @@ export const screenshotsStorage = {
   async add(screenshot: Omit<Screenshot, "id">): Promise<number> {
     const id = await db.screenshots.add(screenshot as Screenshot);
     return id as number;
+  },
+
+  async update(id: number, changes: Partial<Screenshot>): Promise<number> {
+    return await db.screenshots.update(id, changes);
   },
 
   async delete(id: number): Promise<void> {

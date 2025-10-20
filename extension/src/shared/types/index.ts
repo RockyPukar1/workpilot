@@ -54,6 +54,7 @@ export type Screenshot = z.infer<typeof ScreenshotSchema>;
 // Message Types for Background Communication
 export type MessageType =
   | "CLIPBOARD_COPIED"
+  | "SAVE_CLIPBOARD_ITEM"
   | "SAVE_NOTE"
   | "INSERT_TEMPLATE"
   | "CAPTURE_SCREENSHOT"

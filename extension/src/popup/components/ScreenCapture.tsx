@@ -3,12 +3,12 @@ import { ArrowLeft, Camera, Trash2, Download } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { Card } from "@/shared/components/ui/card";
-import { useAppStore } from "@/shared/store";
+import { useNavigate } from "react-router-dom";
 import { useScreenshots } from "@/shared/hooks/useScreenshots";
 import { format } from "date-fns";
 
 export function ScreenCapture() {
-  const setCurrentView = useAppStore((state) => state.setCurrentView);
+  const navigate = useNavigate();
   const { screenshots, addScreenshot, deleteScreenshot, clearAll } =
     useScreenshots();
   const [isCapturing, setIsCapturing] = useState(false);
@@ -65,11 +65,7 @@ export function ScreenCapture() {
       <div className="border-b px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setCurrentView("dashboard")}
-            >
+            <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div>

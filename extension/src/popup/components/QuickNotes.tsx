@@ -4,15 +4,15 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/shared/components/ui/card";
 import { Separator } from "@/shared/components/ui/separator";
-import { useAppStore } from "@/shared/store";
 import { useNotes } from "@/shared/hooks/useNotes";
 import { format } from "date-fns";
 import type { Note } from "@/shared/types";
 
 export function QuickNotes() {
-  const setCurrentView = useAppStore((state) => state.setCurrentView);
+  const navigate = useNavigate();
   const { notes, addNote, updateNote, deleteNote } = useNotes();
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [title, setTitle] = useState("");
@@ -80,11 +80,7 @@ export function QuickNotes() {
       <div className="border-b px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setCurrentView("dashboard")}
-            >
+            <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div>

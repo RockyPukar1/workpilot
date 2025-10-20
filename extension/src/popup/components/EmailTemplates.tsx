@@ -1,5 +1,15 @@
 import { useState } from "react";
-import { ArrowLeft, Plus, Save, Trash2, Mail, Copy, Edit } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import {
+  ArrowLeft,
+  Plus,
+  Save,
+  Trash2,
+  Mail,
+  Copy,
+  Edit,
+  Filter,
+} from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
@@ -11,13 +21,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
 import { Separator } from "@/shared/components/ui/separator";
-import { useAppStore } from "@/shared/store";
 import { useTemplates } from "@/shared/hooks/useTemplates";
+import { TEMPLATE_CATEGORIES } from "@/shared/constants/categories";
 import type { EmailTemplate } from "@/shared/types";
 
 export function EmailTemplates() {
-  const setCurrentView = useAppStore((state) => state.setCurrentView);
+  const navigate = useNavigate();
   const { templates, addTemplate, updateTemplate, deleteTemplate } =
     useTemplates();
   const [isEditing, setIsEditing] = useState(false);
@@ -29,6 +46,8 @@ export function EmailTemplates() {
   const [shortcut, setShortcut] = useState("");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
+  const [category, setCategory] = useState("general");
+  const [filterCategory, setFilterCategory] = useState("all");
 
   const handleNewTemplate = () => {
     setEditingTemplate(null);
@@ -36,6 +55,7 @@ export function EmailTemplates() {
     setShortcut("");
     setSubject("");
     setBody("");
+    setCategory("general");
     setIsEditing(true);
   };
 
@@ -45,6 +65,7 @@ export function EmailTemplates() {
     setShortcut(template.shortcut);
     setSubject(template.subject || "");
     setBody(template.body);
+    setCategory(template.category || "general");
     setIsEditing(true);
   };
 
@@ -62,6 +83,7 @@ export function EmailTemplates() {
           subject: subject || undefined,
           body,
           variables,
+          category,
         },
       });
     } else {
@@ -72,6 +94,7 @@ export function EmailTemplates() {
         subject: subject || undefined,
         body,
         variables,
+        category,
         createdAt: now,
       });
     }
@@ -82,6 +105,7 @@ export function EmailTemplates() {
     setShortcut("");
     setSubject("");
     setBody("");
+    setCategory("general");
   };
 
   const handleDelete = (id: number) => {
@@ -98,6 +122,11 @@ export function EmailTemplates() {
     return matches ? matches.map((m) => m.slice(1, -1)) : [];
   };
 
+  const filteredTemplates = templates.filter((template) => {
+    if (filterCategory === "all") return true;
+    return template.category === filterCategory;
+  });
+
   const copyTemplateToClipboard = async (template: EmailTemplate) => {
     const fullText = template.subject
       ? `Subject: ${template.subject}\n\n${template.body}`
@@ -111,11 +140,7 @@ export function EmailTemplates() {
       <div className="border-b px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setCurrentView("dashboard")}
-            >
+            <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div>
@@ -170,6 +195,22 @@ export function EmailTemplates() {
                   onChange={(e) => setSubject(e.target.value)}
                   className="mt-1"
                 />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">Category</label>
+                <Select value={category} onValueChange={setCategory}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TEMPLATE_CATEGORIES.map((cat) => (
+                      <SelectItem key={cat.value} value={cat.value}>
+                        {cat.icon} {cat.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
@@ -228,95 +269,138 @@ export function EmailTemplates() {
         </div>
       ) : (
         /* Templates List */
-        <ScrollArea className="flex-1">
-          <div className="p-4 space-y-3">
-            {templates.length === 0 ? (
-              <div className="text-center py-12">
-                <Mail className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-                <p className="text-sm text-muted-foreground">
-                  No templates yet
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Create reusable email templates
-                </p>
-                <Button className="mt-4" onClick={handleNewTemplate}>
-                  <Plus className="h-4 w-4 mr-1" />
-                  Create First Template
-                </Button>
-              </div>
-            ) : (
-              templates.map((template) => (
-                <Card
-                  key={template.id}
-                  className="hover:shadow-sm transition-all"
-                >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-base">
-                          {template.name}
-                        </CardTitle>
-                        <CardDescription className="text-xs mt-1">
-                          Shortcut:{" "}
-                          <code className="font-mono">{template.shortcut}</code>
-                        </CardDescription>
-                      </div>
-                      <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7"
-                          onClick={() => copyTemplateToClipboard(template)}
-                        >
-                          <Copy className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7"
-                          onClick={() => handleEditTemplate(template)}
-                        >
-                          <Edit className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 text-destructive"
-                          onClick={() => handleDelete(template.id!)}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    {template.subject && (
-                      <p className="text-xs text-muted-foreground mb-2">
-                        <span className="font-medium">Subject:</span>{" "}
-                        {template.subject}
-                      </p>
-                    )}
-                    <p className="text-sm line-clamp-3 text-muted-foreground">
-                      {template.body}
-                    </p>
-                    {template.variables.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {template.variables.map((variable) => (
-                          <span
-                            key={variable}
-                            className="text-xs bg-muted px-2 py-0.5 rounded"
-                          >
-                            {variable}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))
-            )}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Category Filter */}
+          <div className="border-b px-4 py-3">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <Select value={filterCategory} onValueChange={setFilterCategory}>
+                <SelectTrigger className="h-9 w-[180px]">
+                  <SelectValue placeholder="Filter by category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">📋 All Categories</SelectItem>
+                  {TEMPLATE_CATEGORIES.map((cat) => (
+                    <SelectItem key={cat.value} value={cat.value}>
+                      {cat.icon} {cat.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <span className="text-xs text-muted-foreground ml-auto">
+                {filteredTemplates.length} template
+                {filteredTemplates.length !== 1 ? "s" : ""}
+              </span>
+            </div>
           </div>
-        </ScrollArea>
+
+          <ScrollArea className="flex-1">
+            <div className="p-4 space-y-3">
+              {filteredTemplates.length === 0 ? (
+                <div className="text-center py-12">
+                  <Mail className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+                  <p className="text-sm text-muted-foreground">
+                    {templates.length === 0
+                      ? "No templates yet"
+                      : `No ${filterCategory} templates`}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {templates.length === 0
+                      ? "Create reusable email templates"
+                      : "Try a different category"}
+                  </p>
+                  {templates.length === 0 && (
+                    <Button className="mt-4" onClick={handleNewTemplate}>
+                      <Plus className="h-4 w-4 mr-1" />
+                      Create First Template
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                filteredTemplates.map((template) => (
+                  <Card
+                    key={template.id}
+                    className="hover:shadow-sm transition-all"
+                  >
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="text-base flex items-center gap-2">
+                            {template.name}
+                            {template.category && (
+                              <span className="text-xs">
+                                {
+                                  TEMPLATE_CATEGORIES.find(
+                                    (c) => c.value === template.category
+                                  )?.icon
+                                }
+                              </span>
+                            )}
+                          </CardTitle>
+                          <CardDescription className="text-xs mt-1">
+                            Shortcut:{" "}
+                            <code className="font-mono">
+                              {template.shortcut}
+                            </code>
+                          </CardDescription>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => copyTemplateToClipboard(template)}
+                          >
+                            <Copy className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => handleEditTemplate(template)}
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-destructive"
+                            onClick={() => handleDelete(template.id!)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      {template.subject && (
+                        <p className="text-xs text-muted-foreground mb-2">
+                          <span className="font-medium">Subject:</span>{" "}
+                          {template.subject}
+                        </p>
+                      )}
+                      <p className="text-sm line-clamp-3 text-muted-foreground">
+                        {template.body}
+                      </p>
+                      {template.variables.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {template.variables.map((variable) => (
+                            <span
+                              key={variable}
+                              className="text-xs bg-muted px-2 py-0.5 rounded"
+                            >
+                              {variable}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+          </ScrollArea>
+        </div>
       )}
     </div>
   );

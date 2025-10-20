@@ -18,6 +18,19 @@ export const useScreenshots = () => {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: ({
+      id,
+      changes,
+    }: {
+      id: number;
+      changes: Partial<Screenshot>;
+    }) => screenshotsStorage.update(id, changes),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["screenshots"] });
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: (id: number) => screenshotsStorage.delete(id),
     onSuccess: () => {
@@ -36,6 +49,7 @@ export const useScreenshots = () => {
     screenshots,
     isLoading,
     addScreenshot: addMutation.mutate,
+    updateScreenshot: updateMutation.mutate,
     deleteScreenshot: deleteMutation.mutate,
     clearAll: clearMutation.mutate,
   };

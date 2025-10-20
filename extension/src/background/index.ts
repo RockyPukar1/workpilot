@@ -59,12 +59,18 @@ chrome.commands.onCommand.addListener((command) => {
 
 // Message handler
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
-  console.log("Message received:", request);
+  console.log("Background received message:", request);
 
   switch (request.type) {
     case "CLIPBOARD_COPIED":
-      saveToClipboard(request.payload.content);
-      sendResponse({ success: true });
+      if (request.payload && request.payload.content) {
+        console.log("Processing clipboard content:", request.payload.content);
+        saveToClipboard(request.payload.content);
+        sendResponse({ success: true });
+      } else {
+        console.log("Invalid clipboard payload:", request.payload);
+        sendResponse({ success: false, error: "Invalid payload" });
+      }
       break;
     case "CAPTURE_SCREENSHOT":
       captureScreenshot().then((dataUrl) => {
@@ -72,6 +78,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
       });
       return true; // Keep channel open for async response
     default:
+      console.log("Unknown message type:", request.type);
       sendResponse({ success: false, error: "Unknown message type" });
   }
 });
@@ -87,8 +94,36 @@ async function saveToClipboard(text: string) {
       timestamp: Date.now(),
     };
 
-    // In a real implementation, you'd save to IndexedDB via a message to the popup
-    console.log("Saving to clipboard:", item);
+    // Save directly to storage instead of sending message to popup
+    // This avoids connection issues when popup is not open
+    console.log("Saving clipboard item directly to storage:", item);
+
+    // Save to chrome.storage.local as a backup
+    const storageKey = `clipboard_${Date.now()}`;
+    await chrome.storage.local.set({
+      [storageKey]: item,
+    });
+
+    // Also try to send message to popup if it's open
+    try {
+      chrome.runtime.sendMessage(
+        {
+          type: "SAVE_CLIPBOARD_ITEM",
+          payload: item,
+        },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            console.log("Popup not available, saved to storage only");
+          } else {
+            console.log("Message sent to popup successfully");
+          }
+        }
+      );
+    } catch (error) {
+      console.log("Could not send message to popup:", error);
+    }
+
+    console.log("Saved to clipboard:", item);
   } catch (error) {
     console.error("Failed to save to clipboard:", error);
   }

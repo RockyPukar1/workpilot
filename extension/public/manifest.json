@@ -20,9 +20,8 @@
     "scripting"
   ],
   "host_permissions": [
-    "https://mail.google.com/*",
-    "https://outlook.office.com/*",
-    "https://outlook.office365.com/*"
+    "https://*/*",
+    "http://*/*"
   ],
   "background": {
     "service_worker": "src/background/index.ts",
@@ -40,9 +39,8 @@
   "content_scripts": [
     {
       "matches": [
-        "https://mail.google.com/*",
-        "https://outlook.office.com/*",
-        "https://outlook.office365.com/*"
+        "https://*/*",
+        "http://*/*"
       ],
       "js": ["src/content/index.ts"]
     }
@@ -71,4 +69,3 @@
     }
   }
 }
-

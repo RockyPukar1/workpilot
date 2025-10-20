@@ -1,4 +1,12 @@
-import { Clipboard, StickyNote, Mail, Camera, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import {
+  Clipboard,
+  StickyNote,
+  Mail,
+  Camera,
+  ArrowRight,
+  Settings,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -6,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-import { useAppStore } from "@/shared/store";
+import { Button } from "@/shared/components/ui/button";
 import { useClipboard } from "@/shared/hooks/useClipboard";
 import { useNotes } from "@/shared/hooks/useNotes";
 import { useTemplates } from "@/shared/hooks/useTemplates";
@@ -44,11 +52,13 @@ const features = [
 ];
 
 export function Dashboard() {
-  const setCurrentView = useAppStore((state) => state.setCurrentView);
+  const navigate = useNavigate();
   const { items: clipboardItems } = useClipboard();
   const { notes } = useNotes();
   const { templates } = useTemplates();
   const { screenshots } = useScreenshots();
+
+  console.log(clipboardItems);
 
   const getCounts = (id: string) => {
     switch (id) {
@@ -69,10 +79,21 @@ export function Dashboard() {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="border-b bg-gradient-to-r from-primary/10 to-primary/5 px-6 py-4">
-        <h1 className="text-2xl font-bold text-primary">WorkPilot</h1>
-        <p className="text-sm text-muted-foreground">
-          Corporate Productivity Suite
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-primary">WorkPilot</h1>
+            <p className="text-sm text-muted-foreground">
+              Corporate Productivity Suite
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/settings")}
+          >
+            <Settings className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
 
       {/* Features Grid */}
@@ -86,7 +107,7 @@ export function Dashboard() {
               <Card
                 key={feature.id}
                 className="cursor-pointer hover:shadow-md transition-all hover:border-primary/50"
-                onClick={() => setCurrentView(feature.id)}
+                onClick={() => navigate(`/${feature.id}`)}
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
