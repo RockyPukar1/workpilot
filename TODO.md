@@ -1,3 +1,15 @@
+# Oct 28 2025
+
+- [ ] / must be compulsory in templates
+- [ ] Just like loom can access for whole device for screen record, this extension should be able to take screenshot and record across the device
+- [ ] Template picker dropdown on "/" in email fields (Cursor-style autocomplete with keyboard nav + filtering)
+
+# Oct 29 2025
+
+- [ ] need to find a way to insert subject in the corresponding label. Targetting as subject may select other subject field when multiple composed opened
+
+# Features
+
 - [ ] Template Categories
 - [ ] search everything
 - [ ] Import/Export
