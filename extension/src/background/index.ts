@@ -1,3 +1,4 @@
+import { db } from "@/shared/db";
 // Background Service Worker for WorkPilot
 
 console.log("WorkPilot background service worker loaded");
@@ -77,6 +78,16 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
         sendResponse({ success: true, data: dataUrl });
       });
       return true; // Keep channel open for async response
+    case "GET_TEMPLATE":
+      console.log("Getting template by shortcut:", request.payload.shortcut);
+      getTemplateByShortcut(request.payload.shortcut)
+        .then((template) => {
+          sendResponse({ success: true, data: template });
+        })
+        .catch((error) => {
+          sendResponse({ success: false, error: error.message });
+        });
+      return true;
     default:
       console.log("Unknown message type:", request.type);
       sendResponse({ success: false, error: "Unknown message type" });
@@ -168,5 +179,20 @@ function isUrl(text: string): boolean {
   }
 }
 
-// Monitor clipboard changes (if permission granted)
-// Note: This requires additional permissions and user interaction
+async function getTemplateByShortcut(shortcut: string) {
+  try {
+    // Get all templates from storage
+    const templates = await db.templates.toArray();
+    console.log("Templates:", templates);
+    const template = templates.find((t: any) => t.shortcut === shortcut);
+
+    if (!template) {
+      throw new Error(`Template with shortcut ${shortcut} not found`);
+    }
+
+    return template;
+  } catch (error) {
+    console.error("Error fetching template:", error);
+    throw error;
+  }
+}

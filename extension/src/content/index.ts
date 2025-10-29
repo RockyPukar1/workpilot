@@ -16,6 +16,7 @@ function startListening() {
 
 function handleKeyDown(e: KeyboardEvent) {
   // Handle keyboard shortcuts
+  console.log(e.key);
   if (e.altKey && e.key === "t") {
     e.preventDefault();
     showTemplateMenu();
@@ -32,7 +33,7 @@ function handleInput(e: Event) {
     // Check for template shortcut (e.g., /followup)
     const match = text.match(/\/(\w+)$/);
     if (match) {
-      const shortcut = match[1];
+      const shortcut = match[0];
       loadAndInsertTemplate(shortcut, target);
     }
   }
@@ -57,6 +58,8 @@ async function loadAndInsertTemplate(shortcut: string, target: HTMLElement) {
       type: "GET_TEMPLATE",
       payload: { shortcut },
     });
+
+    console.log("Template response:", response);
 
     if (response.success && response.data) {
       insertTemplate(response.data, target);
